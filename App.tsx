@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -56,11 +56,21 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
+  const [data, setData] = useState<
+    {Arecipe: string; Ingredients: string; Instructions: string}[]
+  >([]);
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:5000/recipes')
+      .then(response => response.json())
+      .then(data => setData(data))
+      .catch(error => console.error(error));
+  }, []);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -76,11 +86,7 @@ function App(): React.JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
+          {/* <Section title="See Your Changes">
             <ReloadInstructions />
           </Section>
           <Section title="Debug">
@@ -88,8 +94,26 @@ function App(): React.JSX.Element {
           </Section>
           <Section title="Learn More">
             Read the docs to discover what to do next:
+          </Section> */}
+          {/* <LearnMoreLinks /> */}
+          {/* Added trial text */}
+          <Section title="Recipes">
+            {data.length > 0 ? (
+              data.map((recipe, index) => (
+                <View key={index} style={{marginBottom: 10}}>
+                  <Text style={[styles.highlight, styles.marginBottom]}>
+                    Recipe: {recipe.Arecipe}
+                  </Text>
+                  <Text style={styles.marginBottom}>
+                    Ingredients: {recipe.Ingredients}
+                  </Text>
+                  <Text>Instructions: {recipe.Instructions}</Text>
+                </View>
+              ))
+            ) : (
+              <Text>No recipes found</Text>
+            )}
           </Section>
-          <LearnMoreLinks />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -112,6 +136,9 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  marginBottom: {
+    marginBottom: 10,
   },
 });
 
